@@ -1,3 +1,3 @@
 - [Overview](home)
-- [Example Second](second-page)
-- [Features](features)
+- [Blockchain](blockchain)
+- [Gameplay](gameplay)
