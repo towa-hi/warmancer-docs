@@ -1,5 +1,5 @@
 <div style="display: flex; justify-content: space-around">
-  <img src="./assets/warmancer-black-01.png" alt="Warmancer Black Friday logo" style="width: 400px;"/>
+  <img src="./assets/logo-white.png" alt="Warmancer Black Friday logo" style="width: 80%;"/>
 </div>
 
 # Technical documentation for Warmancer Black Friday, a electronic game developed by Scrying Stone
