@@ -12,21 +12,21 @@ The Serverless protocol is the strictest option, intended for fully on-chain gam
 
 - **Matchmaking**: On-chain, wallet-to-wallet.
 - **Gameplay**: On-chain, requires transactions.
-- **Features**: Requires gas from both players. All features are available, but in-game communication between players (e.g., emotes and chat) requires transaction authorization. NFT assets can be used. Best suited for slower-paced games, akin to "play-by-email."
+- **Features**: Requires gas from both players. All features are available, but in-game communication between players (e.g., emotes and chat) requires transaction authorization. NFT assets can be used. Best suited for slower-paced matches, akin to "play-by-email."
 
 ### Server Protocol (Fallback)
 The Server protocol is designed for players who do not have wallets and are not yet part of the Stellar ecosystem. This protocol serves as the default fallback if a participant in a game does not have a connected wallet. Players send game requests through the Warmancer matchmaking server and play by sending socket requests instead of transactions.
 
 - **Matchmaking**: Off-chain, through the matchmaking server.
 - **Gameplay**: Off-chain; actions are securely sent via WebSocket to the matchmaking server.
-- **Features**: Does not require gas to play. NFT assets cannot be used. Games are not logged on-chain, and no persistent user data is stored.
+- **Features**: Does not require gas to play. NFT assets cannot be used. Matches are not logged on-chain, and no persistent user data is stored.
 
 ### Hybrid Protocol (Recommended)
 The Hybrid protocol is the default for matches where at least one player has a connected wallet. This protocol combines all blockchain features with the advantages of a central server, minimizing the number of transactions required for gameplay.
 
 - **Matchmaking**: On-chain or off-chain.
 - **Gameplay**: On-chain for record-keeping and verification; off-chain during gameplay.
-- **Features**: Requires gas for recording and verifying games. NFT assets can be used by players with connected wallets. Suitable for most situations.
+- **Features**: Requires gas for recording and verifying matches. NFT assets can be used by players with connected wallets. Suitable for most situations.
 
 ## NFT Assets
 Warmancer Black Friday will be launched alongside a collection of NFT assets created by the game's artists. In addition to being genuinely cool and unique art pieces, these assets can be used to add playable custom skins in-game.

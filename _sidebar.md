@@ -1,3 +1,4 @@
 - [Overview](home)
 - [Blockchain](blockchain)
 - [Gameplay](gameplay)
+- [Glossary](glossary)
