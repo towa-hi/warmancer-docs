@@ -8,7 +8,7 @@
 Warmancer Black Friday is a free online strategy game developed by Scrying Stone designed to showcase the potential of the Stellar blockchain in gaming. It’s a 1v1 player-versus-player experience that combines turn-based mechanics with simultaneous turn gameplay, all built around the concept of imperfect information. The game can be played directly on-chain, offering a seamless integration of blockchain technology into the gaming experience.
 
 <div style="display: flex; justify-content: flex-start;">
-  <img src="./assets/start.png" alt="Red Effigy" style="width: 400px;"/>
+  <img src="./assets/start.PNG" alt="start screen" style="width: 400px;"/>
 </div>
 
 ## Features
