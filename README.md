@@ -1,5 +1,5 @@
 # Docsify Template
-
+![Warmancer Logo](./assets/warmancer-black-01.png)
 > A simple [Docsify](https://github.com/docsifyjs/docsify/) template for creating Markdown-based documentation sites, with no build process required.
 
 ## Site Setup
