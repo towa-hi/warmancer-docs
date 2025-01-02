@@ -1,7 +1,9 @@
-![Warmancer Logo](./assets/warmancer-black-01.png)
+<div style="display: flex; justify-content: space-around">
+  <img src="./assets/warmancer-black-01.png" alt="Warmancer Black Friday logo" style="width: 400px;"/>
+</div>
 
-# Technical documentation for Warmancer Black Friday, a electronic game by Scrying Stone
-
+# Technical documentation for Warmancer Black Friday, a electronic game developed by Scrying Stone
+---
 ## Warmancer Black Friday
 Warmancer Black Friday is a free online strategy game developed by Scrying Stone designed to showcase the potential of the Stellar blockchain in gaming. It’s a 1v1 player-versus-player experience that combines turn-based mechanics with simultaneous turn gameplay, all built around the concept of imperfect information. The game can be played directly on-chain, offering a seamless integration of blockchain technology into the gaming experience.
 
