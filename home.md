@@ -16,7 +16,7 @@ Warmancer Black Friday is a free online strategy game developed by Scrying Stone
 - **Multiple Platforms**: Play through your web browser, [Discord Activities](https://discord.com/developers/docs/activities/overview), or use the mobile app.
 - **Highly Customizable**: Tailor your experience with custom boards, rules, and pawns to match your preferences.
 - **On-Chain Gameplay**: Designed for trustless, serverless, and fully verifiable gameplay using smart contracts.
-- **Stellar Blockchain Integration**: Effortlessly connect wallets and challenge others through the Stellar blockchain.
+- **Stellar Blockchain Integration**: Effortlessly connect wallets and challenge others using Soroban smart contracts.
 - **NFT Integration**: Seamlessly incorporate NFT assets into the game as usable items, rewards, or tradeable assets.
 - **Handcrafted Art and Animations**: Stunning hand drawn visuals created by [Blakkmass](https://x.com/blakkmassart) and [Robek World](https://x.com/robek_world).
 - **Original Music**: Immersive soundtrack composed by [Noxis](https://x.com/aegiuscreator).
