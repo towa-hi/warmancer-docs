@@ -1,6 +1,12 @@
 # Gameplay
 Warmancer Black Friday is a turn-based strategy board game based around the concept of imperfect information where two players compete to dominate the battlefield with their hidden pawns and destroy each other's thrones.
 
+<div style="display: flex; justify-content: flex-start;">
+  <img src="./assets/concept2.png" alt="board concept art" style="width: 400px;"/>
+</div>
+
+---
+
 ## Game Parameters
 The creator of the challenge can custom rules for their game.
 - **Custom board**:
@@ -13,6 +19,10 @@ When true, players are given a set budget to buy the pawns they wish to use lead
 When true, surviving pawns are not revealed after battle. Disables battle cutscenes.
 - **Sequential moves**:
 When true, players take turns making moves instead of simultaneously resolving moves.
+
+<div style="display: flex; justify-content: flex-start;">
+  <img src="./assets/concept1.png" alt="board concept art" style="width: 400px;"/>
+</div>
 
 
 ## Game Flow
@@ -53,4 +63,14 @@ In the Resolve Phase, players watch the recorded sequence of operations play out
 
 In the final phase, players submit the keys to their original setup configurations, allowing the Server to verify the game’s integrity. The Server replays the game step by step, ensuring all moves and outcomes align with the original setups and rules. Once verified, the game history is recorded, and player data, such as stats or rankings, is updated.
 
+Victory conditions are as follows:
+- Destroy the opponent's throne.
+- If both players thrones are destroyed, the game ends in a tie.
+- If a player has no pawns with valid moves remaning, they must forfeit the game.
+- Players may elect to forfeit the game.
+
 Players are presented with a detailed end-game summary, including a replay option to analyze the match move by move. The match is stored locally for future reference. Finally, players are returned to the main menu, where they can choose to start a new game or explore other options.
+
+<div style="display: flex; justify-content: flex-start;">
+  <img src="./assets/victory.png" alt="victory screen" style="width: 400px;"/>
+</div>

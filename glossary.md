@@ -1,10 +1,13 @@
 # Glossary
 
+Glossary of terminology for reference
+---
+
 ## Lobby
 A lobby is a pre-match state that bridges players before a game begins. On the server side, it represents an unfinalized match, holding two players and match parameters, while on the client side, it serves as a waiting area where players can view match parameters, ready up, and chat.
 
 ## Match
-A match is a gameplay session with two players. Matches end when at least one player has been defeated. 
+A match is a gameplay session with two players. Matches end when at least one player has been defeated.
 
 ## Board
 A board is the set of tiles that a match is played on. Boards are defined with simple JSON. Custom board layouts can be imported and played in multiplayer. Boards can contain square or hexagonal tiles.
