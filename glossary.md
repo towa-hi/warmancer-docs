@@ -1,6 +1,7 @@
 # Glossary
 
 Glossary of terminology for reference
+
 ---
 
 ## Lobby
