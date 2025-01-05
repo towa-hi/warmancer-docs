@@ -65,7 +65,7 @@ A rank determines a pawn's base combat power and any special properties it may h
 
 - Combat Power: 3
 - Count: 5
-- Can disarm traps, removing them from play
+- Can disarm traps, removing them from play. Indespensible in late-game
 
 ### 4. Grunt
 
@@ -98,6 +98,7 @@ A rank determines a pawn's base combat power and any special properties it may h
 
 - Combat Power: 6
 - Count: 4
+- Formidable sword wielding servants
 
 ### 7. Reaver
 
@@ -108,6 +109,7 @@ A rank determines a pawn's base combat power and any special properties it may h
 
 - Combat Power: 7
 - Count: 3
+- Stronger than most
 
 ### 8. Herald
 
@@ -118,6 +120,7 @@ A rank determines a pawn's base combat power and any special properties it may h
 
 - Combat Power: 8
 - Count: 2
+- Don't squander these
 
 ### 9. Champion
 
@@ -151,4 +154,4 @@ A rank determines a pawn's base combat power and any special properties it may h
 - Combat Power: 13
 - Count: 6
 - Immobile
-- Stationary tile hazards that consume all that fall into it's maw. 
+- Stationary tile hazards that consume all that fall into it's maw. Can be removed by Seers
