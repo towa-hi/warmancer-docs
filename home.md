@@ -41,7 +41,7 @@ Warmancer Black Friday is a free online strategy game developed by Scrying Stone
 ## Tech Stack
 ### Client Engine: Unity3D
 The Warmancer client is developed on the Unity game engine to leverage its versatile build platform selection and graphical capabilities. Unity engine empowers us to rapidly prototype our game, leverage existing assets and reach the largest audience.
-### Server: Cloud based custom .NET solution
+### Server: Cloud based Rust server
 While Warmancer doesn't require a traditional server when played on-chain, A cloud based server will be built to allow users without crypto wallets to authenticate, find matches and play with others.
 ### Blockchain Integration: Stellar .NET SDK
 Warmancer is made possible by the Stellar .NET SDK, which allows .NET applications like Unity3D programs to interface with the Stellar ecosystem using Horizon.
