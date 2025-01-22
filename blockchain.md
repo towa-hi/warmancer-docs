@@ -2,6 +2,11 @@
 
 Warmancer Black Friday is deliberately designed to showcase meaningful applications of blockchain technology in gaming, extending beyond mere monetization.
 
+<div style="display: flex; justify-content: flex-start;">
+  <img src="./assets/under_construction.gif" alt="under construction" style="width: 10%;"/>
+</div>
+
+*1/20/2025 Note: This section is outdated and will contain more specific implementation details for Soroban*
 
 ## Protocols
 
