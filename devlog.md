@@ -2,6 +2,10 @@
 ---
 ## Entry 1 - April 28 2025
 
+<div style="display: flex; justify-content: flex-start;">
+  <img src="./assets/devlog1/red2.gif" alt="red pawn 2" style="width: 20%;"/>
+</div>
+
 ### Deliverables
 
 These were the deliverables promised for the Tranche 1 MVP. 
@@ -41,6 +45,10 @@ Thanks to hard work from our team through Q1 2025, we were able to complete ever
 - You can connect your Freighter wallet to see your SCRY asset balance
 - You can send messages to your opponent with the chatbox
 
+<div style="display: flex; justify-content: flex-start;">
+  <img src="./assets/devlog1/blue10.gif" alt="blue pawn 10" style="width: 20%;"/>
+</div>
+
 ### What's next?
 
 Tranche 2 will be focused on refining the contract to reduce usage cost as much as possible and integrating an indexer to make gameplay truly real-time.
@@ -67,7 +75,7 @@ This is a guide for the current controls in Warmancer. The UI is still a work in
 #### Intro Screen
 
 <div style="display: flex; justify-content: flex-start;">
-  <img src="./assets/devlog1/0intro.png" alt="under construction" style="width: 10%;"/>
+  <img src="./assets/devlog1/0intro.png" alt="intro screen" style="width: 10%;"/>
 </div>
 
 First menu that shows up in game.
@@ -77,7 +85,7 @@ First menu that shows up in game.
 #### Start Menu
 
 <div style="display: flex; justify-content: flex-start;">
-  <img src="./assets/devlog1/1main.png" alt="under construction" style="width: 10%;"/>
+  <img src="./assets/devlog1/1main.png" alt="start menu" style="width: 10%;"/>
 </div>
 
 Temporary menu for all important top level functions.
@@ -109,7 +117,7 @@ Temporary menu for all important top level functions.
 #### Lobby Creation Menu
 
 <div style="display: flex; justify-content: flex-start;">
-  <img src="./assets/devlog1/2lobbyMaker.png" alt="under construction" style="width: 10%;"/>
+  <img src="./assets/devlog1/2lobbyMaker.png" alt="lobby creation menu" style="width: 10%;"/>
 </div>
 
 Menu for setting the parameters for creating a new game lobby.
@@ -153,7 +161,7 @@ Menu that displays parameters of the game lobby you're in. Doesn't edit anything
 #### Join Lobby Menu
 
 <div style="display: flex; justify-content: flex-start;">
-  <img src="./assets/devlog1/4lobbyJoin.png" alt="under construction" style="width: 10%;"/>
+  <img src="./assets/devlog1/4lobbyJoin.png" alt="join lobby menu" style="width: 10%;"/>
 </div>
 
 Menu for joining lobbies.
@@ -167,7 +175,7 @@ Menu for joining lobbies.
 #### Wallet Menu
 
 <div style="display: flex; justify-content: flex-start;">
-  <img src="./assets/devlog1/5wallet.png" alt="under construction" style="width: 10%;"/>
+  <img src="./assets/devlog1/5wallet.png" alt="wallet menu" style="width: 10%;"/>
 </div>
 
 Menu for wallet related functions. Currently, wallet data does not persist past this menu for safety reasons.
@@ -183,7 +191,7 @@ Menu for wallet related functions. Currently, wallet data does not persist past 
 #### Game Setup GUI
 
 <div style="display: flex; justify-content: flex-start;">
-  <img src="./assets/devlog1/6setup.png" alt="under construction" style="width: 10%;"/>
+  <img src="./assets/devlog1/6setup.png" alt="game setup gui" style="width: 10%;"/>
 </div>
 
 GUI for the first phase of the game. You must occupy all tiles of your color with pawns before starting the game and then submit your setup to the network. To set a Pawn on a tile, click a entry from the list and then click a tile. The number to the right of the pawn name is the number of remaining pawns of that type available to you. Clicking a occupied tile removes the pawn. When all pawns have been placed, you can submit your setup.
@@ -203,7 +211,7 @@ GUI for the first phase of the game. You must occupy all tiles of your color wit
 GUI for the main phase of the game. To queue a move, click a pawn from your team and click a highlighted pawn. You can change your queued move by selecting a different pawn. You can clear your queued move by clicking an empty or invalid tile. When your move is queued (a red tile and green tile on screen), you can click submit to submit the move commit. When the move commit is submitted, you will be in a state where you can only wait for your opponent to send a move commit. Click refresh to check if your opponent has sent a move commit. Once your opponent has commited a move, your client will automatically calculate the result of the moves. Once this is done, if your opponent hasn't done so either you'll have to wait for them to send the result to the server. When both players have sent results, the network will start the next turn, and the results of the turn will play back for you. In essence, this is a two stage commit-reveal scheme.
 
 <div style="display: flex; justify-content: flex-start;">
-  <img src="./assets/devlog1/7movement.png" alt="under construction" style="width: 10%;"/>
+  <img src="./assets/devlog1/7movement.png" alt="game play gui" style="width: 10%;"/>
 </div>
 
 - **A:** Displays the current status of the turn. When a circle is filled in, it means that a player has submitted a move for that turn.
