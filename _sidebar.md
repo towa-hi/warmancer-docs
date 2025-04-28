@@ -3,3 +3,4 @@
 - [Gameplay](gameplay)
 - [Settings](settings)
 - [Glossary](glossary)
+- [Development Log](devlog)
