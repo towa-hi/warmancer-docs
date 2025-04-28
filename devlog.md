@@ -41,13 +41,36 @@ Thanks to hard work from our team through Q1 2025, we were able to complete ever
 - You can connect your Freighter wallet to see your SCRY asset balance
 - You can send messages to your opponent with the chatbox
 
+### What's next?
+
+Tranche 2 will be focused on refining the contract to reduce usage cost as much as possible and integrating an indexer to make gameplay truly real-time.
+#### Server side:
+
+Warmancer multiplayer is currently entirely on-chain. The state of the match is tracked by the contract and is queried by the client as authoritative. Significant improvements to contract storage efficiency can be made by bitpacking stored data. The large Lobby struct which holds the game state can also be split into smaller ledgers for read efficiency, and much of the state can be held as hashes. We should be able to reduce transaction costs by more than 90% by making these changes. Once the contract has been refined, we can begin work on a webserver that can take in RPC calls from the client and emulate contract functions to allow users to play the game off-chain.
+
+For assets on the Stellar network, our immediate goals are to make assets that people will want. We plan on making high-quality art that can be inspected in and out of the game using SEP-0039. Having these assets in your account will impact the gameplay in some way (Currently still being planned).
+
+#### Client side:
+
+Using an indexer to read contract state will speed up the pace of game and reduce our reliance on the testnet RPC server.
+
+Warmancer's client already looks pretty good, but there's a lot more we can do to make the game exciting. Our artists will be focusing on UI, sound, presentation and animations to bring this game to life. In this phase of development, we will be playtesting a lot to get a feel for how to make the game fun.
+
+The current chat system will be reworked into a more detailed game logging and real-time update subsystem. Players will be able to send taunts to their opponents and some game state will be transmitted through off-chain real-time networks.
+
+Wallets will be more closely integrated into the game as core features reach a point where mainnet operation becomes viable. Once off-chain game management is achieved, transactions can be reduced to submitting cryptographic proofs of game completion rather than entire game states.
+
 ### User Guide
+
+This is a guide for the current controls in Warmancer. The UI is still a work in progress, and any unlabeled buttons don't do anything.
 
 #### Intro Screen
 
 <div style="display: flex; justify-content: flex-start;">
   <img src="./assets/devlog1/0intro.png" alt="under construction" style="width: 10%;"/>
 </div>
+
+First menu that shows up in game.
 
 - **A:** Starts the game. Automatically connects using the development testnet account.
 
@@ -56,6 +79,8 @@ Thanks to hard work from our team through Q1 2025, we were able to complete ever
 <div style="display: flex; justify-content: flex-start;">
   <img src="./assets/devlog1/1main.png" alt="under construction" style="width: 10%;"/>
 </div>
+
+Temporary menu for all important top level functions.
 
 - **A:** Text field for inputting a contract ID (must be a valid testnet contract).
 
@@ -87,6 +112,8 @@ Thanks to hard work from our team through Q1 2025, we were able to complete ever
   <img src="./assets/devlog1/2lobbyMaker.png" alt="under construction" style="width: 10%;"/>
 </div>
 
+Menu for setting the parameters for creating a new game lobby.
+
 - **A:** Dropdown to select the board you want to play on.
 
 - **B:** Toggle an optional parameter that requires players to fill all available tiles on the board with pawns during the setup phase.
@@ -104,6 +131,8 @@ Thanks to hard work from our team through Q1 2025, we were able to complete ever
 <div style="display: flex; justify-content: flex-start;">
   <img src="./assets/devlog1/3lobbyView.png" alt="under construction" style="width: 10%;"/>
 </div>
+
+Menu that displays parameters of the game lobby you're in. Doesn't edit anything.
 
 - **A:** Copies the contract address to clipboard. Doesn't work in WebGL.
 
@@ -127,6 +156,8 @@ Thanks to hard work from our team through Q1 2025, we were able to complete ever
   <img src="./assets/devlog1/4lobbyJoin.png" alt="under construction" style="width: 10%;"/>
 </div>
 
+Menu for joining lobbies.
+
 - **A:** Field for entering the lobby Id you want to join
 
 - **B:** Go back to the Start Menu
@@ -138,6 +169,8 @@ Thanks to hard work from our team through Q1 2025, we were able to complete ever
 <div style="display: flex; justify-content: flex-start;">
   <img src="./assets/devlog1/5wallet.png" alt="under construction" style="width: 10%;"/>
 </div>
+
+Menu for wallet related functions. Currently, wallet data does not persist past this menu for safety reasons.
 
 - **A:** Copy connected Freighter wallet address to clipboard. Doesn't work in WebGL. 
 
@@ -153,6 +186,8 @@ Thanks to hard work from our team through Q1 2025, we were able to complete ever
   <img src="./assets/devlog1/6setup.png" alt="under construction" style="width: 10%;"/>
 </div>
 
+GUI for the first phase of the game. You must occupy all tiles of your color with pawns before starting the game and then submit your setup to the network. To set a Pawn on a tile, click a entry from the list and then click a tile. The number to the right of the pawn name is the number of remaining pawns of that type available to you. Clicking a occupied tile removes the pawn. When all pawns have been placed, you can submit your setup.
+
 - **A:** Click a list entry to select the type of pawn you want to place.
 
 - **B:** Clear board of all Pawns.
@@ -164,6 +199,8 @@ Thanks to hard work from our team through Q1 2025, we were able to complete ever
 - **E:** Submits Pawn commitments and enters Game Play GUI
 
 #### Game Play GUI
+
+GUI for the main phase of the game. To queue a move, click a pawn from your team and click a highlighted pawn. You can change your queued move by selecting a different pawn. You can clear your queued move by clicking an empty or invalid tile. When your move is queued (a red tile and green tile on screen), you can click submit to submit the move commit. When the move commit is submitted, you will be in a state where you can only wait for your opponent to send a move commit. Click refresh to check if your opponent has sent a move commit. Once your opponent has commited a move, your client will automatically calculate the result of the moves. Once this is done, if your opponent hasn't done so either you'll have to wait for them to send the result to the server. When both players have sent results, the network will start the next turn, and the results of the turn will play back for you. In essence, this is a two stage commit-reveal scheme.
 
 <div style="display: flex; justify-content: flex-start;">
   <img src="./assets/devlog1/7movement.png" alt="under construction" style="width: 10%;"/>
@@ -209,6 +246,7 @@ Thanks to hard work from our team through Q1 2025, we were able to complete ever
 >* **Issue: Transactions sometimes fail because Execution error scecExceededLimit ["operation byte-read resources exceeds amount specified","45856","45260"]**
 >
 >	**Cause:** Happens when users send move requests too close together, causing simulation state to not match actual state.
+>	
 >	**Current workaround:** Sending the request again should work.
 >	
 >	**Planned solution:** The client will check the hashes of the simulated and actual contract states before submitting. This sounds like a race condition thing, but it's actually a transaction precondition issue that should be pretty simple to solve.
@@ -236,7 +274,7 @@ Thanks to hard work from our team through Q1 2025, we were able to complete ever
 >	**Cause:** Access to the system clipboard copy buffer is restricted from within Unity engine.
 >	
 >	**Current workaround:** Use Javascript interop layer to send data to user's clipboard.
-
+>
 >* **Issue: There is no way to exit a game after winning or losing.**
 >
 >	**Cause:** Ending screens are currently just a placeholder.
