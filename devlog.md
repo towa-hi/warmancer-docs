@@ -260,43 +260,39 @@ Now, Warmancer lobbies are ephemeral and have a lifespan of 24 hours. Finishing 
 	
 ### Transaction Count Optimization
 
-	One of the hardest problems in Warmancer was building a simultaneous, imperfect-information game on a fully transparent blockchain. Not only is the entire gamestate public, but so are all transactions. That means a player could easily check their opponent’s moves or pawn ranks just by looking up their address on a block explorer.
+One of the hardest problems in Warmancer was building a simultaneous, imperfect-information game on a fully transparent blockchain. Not only is the entire gamestate public, but so are all transactions. That means a player could easily check their opponent’s moves or pawn ranks just by looking up their address on a block explorer.
 
-	To prevent this, turns in Warmancer follow a three-stage commit reveal pattern. 
-	
-	1. commit_move: Each player submits a hash of the move they plan to make. The contract stores it, but doesn’t know what it is yet.
+To prevent this, turns in Warmancer follow a three-stage commit reveal pattern. 
 
-	2. prove_move: After both players have committed, they reveal their original moves. The contract checks the hash and updates the game state, but only if no pawn information needs to be revealed.
+- commit_move: Each player submits a hash of the move they plan to make. The contract stores it, but doesn’t know what it is yet.
 
-	3. prove_rank: If any unrevealed pawns are involved in combat, players must now submit proofs to reveal their ranks so the contract can resolve the turn correctly.
-	
-	This pattern ensures secrecy but requires each player to make 3 sequential transactions in the worst case scenario. It takes Stellar 5 seconds to process a ledger, so the minimum wait time is an agonizingly slow 15 seconds between turns.
-	
-	To solve this, we introduced a 'staggered' commit reveal pattern uses Stellar's transaction simulation feature to reduce cost and latency.
-	
-	Here’s how it works now:
-	
-	1. Player A checks the current turn state. If they’re the first to act, they submit commit_move.
+- prove_move: After both players have committed, they reveal their original moves. The contract checks the hash and updates the game state, but only if no pawn information needs to be revealed.
 
-	2. Player B checks the ledger and sees that Player A already committed, so they skip straight to commit_move_and_prove_move, a batched call that does both steps in one transaction.
+- prove_rank: If any unrevealed pawns are involved in combat, players must now submit proofs to reveal their ranks so the contract can resolve the turn correctly.
 
-	3. Now that the contract has commitments for both moves and proof for Player B's move, Player A simulates simulate_collisions, a read-only call that tells them whether any pawn ranks need to be revealed depending on what move was passed in.
+This pattern ensures secrecy but requires each player to make 3 sequential transactions in the worst case scenario. It takes Stellar 5 seconds to process a ledger, so the minimum wait time is an agonizingly slow 15 seconds between turns.
 
-	If no ranks need to be revealed, Player A calls prove_move, and the turn is resolved.
+To solve this, we introduced a 'staggered' commit reveal pattern uses Stellar's transaction simulation feature to reduce cost and latency.
 
-	If ranks must be revealed, Player A calls prove_move_and_prove_rank—again, batched into one transaction.
+Here’s how it works now:
 
-	4. If any of Player B’s pawns also need to be revealed, they finish the turn with a prove_rank call.
-	
-	By peeking into the contract’s state and choosing the optimal action based on simulation results, players can skip unnecessary steps and bundle operations together. This reduces total transactions per turn from:
+- Player A checks the current turn state. If they’re the first to act, they submit commit_move.
 
-	- Worst case: 6 → 4
+- Player B checks the ledger and sees that Player A already committed, so they skip straight to commit_move_and_prove_move, a batched call that does both steps in one transaction.
 
-	- Best case: 4 → 3
+- Now that the contract has commitments for both moves and proof for Player B's move, Player A simulates simulate_collisions, a read-only call that tells them whether any pawn ranks need to be revealed depending on what move was passed in. If no ranks need to be revealed, Player A calls prove_move, and the turn is resolved. If ranks must be revealed, Player A calls prove_move_and_prove_rank—again, batched into one transaction.
 
-	- Wait time: 15s → 10s
+- If any of Player B’s pawns also need to be revealed, they finish the turn with a prove_rank call.
 
-	- Fee range: $0.028 → $0.019
+By peeking into the contract’s state and choosing the optimal action based on simulation results, players can skip unnecessary steps and bundle operations together. This reduces total transactions per turn from:
+
+- Worst case: 6 → 4
+
+- Best case: 4 → 3
+
+- Wait time: 15s → 10s
+
+- Fee range: $0.028 → $0.019
 
 
 	
