@@ -1,5 +1,330 @@
 # Warmancer Black Friday Development Log
 ---
+## Entry 2 - July 20 2025
+
+
+### Deliverables
+
+These were the deliverables promised for the Tranche 2 MVP.
+> - **"Multiplayer gameplay modes running on external servers"**
+>
+>The Testnet build of the game client can be configured to run through any Stellar RPC Testnet endpoint!
+>
+> - **"Launch a blockchain-enabled testnet version with Anti-cheat smart contracts"**
+>
+>The Warmancer contract is live on Stellar's Testnet and has been engineered to resist all forms of cheating by using cryptographic verification on all public functions. Despite total transparency, it is **IMPOSSIBLE** to gain an unfair advantage by observing the contract's activity.
+>
+> - **"Exploration of zero-knowledge proofs (if feasible)"**
+>
+>We've identified use cases for ZK proofs that could theoretically enhance performance, but Stellar's contract-side ZK-SNARK verification isn’t ready yet. Even if it were, Stellar's transaction fees are already so minimal that the traditional Merkle tree verification we built remains more cost-effective.
+>
+
+Tranche 2 deliverables have been ready for a while, but we chose to wait for the Testnet protocol upgrade, allowing us to refine gameplay and graphics. Warmancer has greatly benefited from Protocol 23's improvements, and we're proud to showcase our smart contract to Stellar developers.
+
+## Known Issues
+
+Note: The client provided is a 'testing build' from an earlier point in development history (two weeks ago) from when the contract code was most stable, as opposed to the client. Certain features were stripped for benchmarking and optimization purposes. The graphics and features in this do not reflect the current state of development.
+
+**Stripped features:**
+- Singleplayer
+- In-game Chat
+- Animations
+- Boards other than HexNarrow
+- Custom boards
+- New menu system
+
+<details>
+<summary>Click to expand known issues</summary>
+
+>#### Known Contract related issues:
+>
+>* **Issue: Can prematurely end games with redeem_win call**
+>
+>	**Cause:** Turn time tracking functionality was disabled because it interfered with simulation.
+>	
+>	**Current workaround:** None.
+>	
+>	**Planned solution:** Timeout wins will be reimplemented in the near future
+>	
+>#### Known Client related issues:
+>
+>* **Issue: Screen rapidly flashes when waiting for opponents to submit moves**
+>
+>	**Cause:** That's the debug display, sorry.
+>	
+>	**Current workaround:** None.
+>	
+>	**Planned solution:** A build without debug tools will be provided on request.
+>	
+>* **Issue: Winning and losing games has no feedback**
+>
+>	**Cause:** Disabled in test build. Victory & defeat screens are still WIP.
+>	
+>	**Current workaround:** Check the contract state on stellar.expert or debug messages in your browser to see if you won or lost.
+>	
+>	**Planned solution:** Already implemented in the head build.
+>	
+>* **Issue: "this client does not have the required cached data to play this lobby" displayed when attempting to enter a lobby**
+>
+>	**Cause:** The game has been started by another client with your test credentials. Your client doesn't have the required data (the actual ranks of all your hidden pawns) to render the lobby.
+>	
+>	**Current workaround:** Switch to an entirely new address and start a new game. Only join games that your client has started.
+>	
+>	**Planned solution:** This is intentional. You can't just change clients and expect the new client to magically know what your pawns are when the server doesn't store that data on purpose. In the future, a client ID scheme will be implemented so this information is presented in a better way.
+>	
+>#### Known Wallet related issues:
+>
+>* **Issue: Wallet screen is weird / gives inconsistent information**
+>
+>	**Cause:** Test branch outdated with recent protocol changes.
+>	
+>	**Current workaround:** None.
+>	
+>	**Planned solution:** Will be fixed soon.
+>	
+
+</details>
+
+### Fully on Chain Multiplayer
+
+There are very few multiplayer games that run on Layer 1 that can truly be called "fully-on-chain" because players must cover steep transaction fees and developers face strict limitations in unforgiving contract environments. Stellar's cost efficiency and ease of use makes it possible for Warmancer to be entirely on-chain and playable with each turn costing less than a penny.
+
+Warmancer uses every trick in the book and then some more to reduce costs for players:
+
+### Storage Optimization
+
+Stellar storage is by far the largest driver of cost. A turn-based strategy game like Warmancer needs on-chain storage for matchmaking and to maintain a live, mutable game state. A raw snapshot of the game board in XDR weighs in at around 33 KB. A uncompressed XDR snapshot of the state of a Warmancer lobby is approximately 33 KB, far exceeding Stellar's 8 KB return limit. With aggressive optimization, we have reduced our game's storage down to just 1.6 KB, a 96% reduction in storage size.
+
+* **Merkle tree verification: 5.12 KB → 0.01 KB**
+
+Warmancer's design and cryptographic secureness requires a large amount of game state data to be stored on chain. Warmancer's API needs to verify complex client-generated structs, so the full game state must be stored. Hashes in particular are the largest objects in stored game state. A typical Warmancer game must store up to 80 hashes (5120 bytes) of completely uncompressable data. We could truncate the hashes to save space, but this would weaken the cryptographic security of the game and opens the door to pre-imaging attacks. 
+
+Instead, we have use the same solution Stellar uses to verify its own data: Merkle trees. Clients can locally generate a Merkle tree for all their pawn commitments, and the contract only needs to store the root. This is sufficient because the contract only needs to be able to verify a piece of data's "proof of existence at a specific index"
+
+This is the data we will use to prove our comittment:
+```
+// client stores this to submit later when asked
+pub struct HiddenRank {
+	pub pawn_id: u32, 
+	// Pawn_ids are based on initial position, so they have almost no entropy
+	pub rank: u32, 
+	// Ranks are between 0 and 12, so no entropy here
+	pub salt: u64, 
+	// Here's our entropy. This gets hashed too, so in a cryptographic terms, it's actually a "pepper"
+}
+```
+Clients generate 40 hashes of HiddenRank during setup, build a Merkle tree from them, and submit just the root hash.
+
+The request to commit the setup:
+```
+pub struct CommitSetupReq {
+	pub lobby_id: LobbyId,
+	// This is the root of the Merkle tree that the client has generated
+	pub rank_commitment_root: BytesN<32>, 
+}
+```
+The contract stores the rank_commitment_root as is. Verification happens later, when combat reveals are needed. At that point, the client submits this:
+```
+pub struct MerkleProof {
+	pub leaf_index: u32, 
+	// original position of the HiddenRank
+	pub siblings: Vec<BytesN<32>>, 
+	// A series of hashes tracing from a path from the index to the root
+}
+
+pub struct ProveRankReq {
+	pub hidden_ranks: Vec<HiddenRank>, 
+	// This is a vector because multiple pawns might need to be revealed on the same turn. 
+	// The HiddenRanks here are exactly the same as the ones that were used to generate 
+	// the hashes in the initial Merkle tree
+	pub lobby_id: LobbyId,
+	pub merkle_proofs: Vec<MerkleProof>, 
+	// This vector maps to the hidden_ranks vector
+}
+```
+With only this unstored ephemeral request data, the contract can reconstruct the hash of the HiddenRank and verify the commitment without storing more than a single 32 byte root per player. Even knowing all intermediate hashes won't help an attacker because they would still need to brute-force a 32 byte pre-image with 64+ bits of entropy.
+
+Here's the merkle proof verification function.
+```
+pub(crate) fn verify_merkle_proof(e: &Env, leaf: &MerkleHash, proof: &MerkleProof, root: &MerkleHash) -> bool {
+	let mut current_hash = leaf.clone();
+	let mut index = proof.leaf_index;
+	for (_, sibling) in proof.siblings.iter().enumerate() {
+		// Create a 32-byte array directly for concatenation
+		let mut combined_bytes = [0u8; 32];
+		// Determine order based on index (even = current is left, odd = current is right)
+		if index % 2 == 0 {
+			// Current hash goes on the left, sibling on the right
+			combined_bytes[0..16].copy_from_slice(&current_hash.to_array());
+			combined_bytes[16..32].copy_from_slice(&sibling.to_array());
+		} else {
+			// Sibling goes on the left, current hash on the right
+			combined_bytes[0..16].copy_from_slice(&sibling.to_array());
+			combined_bytes[16..32].copy_from_slice(&current_hash.to_array());
+		}
+		// Hash the combined bytes
+		let parent_full = e.crypto().sha256(&Bytes::from_array(e, &combined_bytes));
+		// Take first 16 bytes as the new current hash
+		let parent_bytes = parent_full.to_array();
+		current_hash = MerkleHash::from_array(e, &parent_bytes[0..16].try_into().unwrap());
+		// Move up the tree
+		index = index / 2;
+	}
+	let result = current_hash == *root;
+	result
+}
+```
+This technique alone cuts our commitment storage requirement by over 95%, saving about 5 KB per game.
+
+* **Bit packing and data optimization: 15.4 KB → 0.9 KB**
+
+Pawns have a lot of stateful data, so it all needs to be stored.
+```
+pub struct PawnState {
+	pub pawn_id: PawnId,	// never mutates
+	pub setup_pos: Pos,		// never mutates
+	pub team: bool,			// never mutates, either host or guest
+	pub alive: bool,		// mutated when a pawn dies
+	pub moved: bool,		// mutated when a pawn moves
+	pub moved_scout: bool,	// mutated when a pawn moves more than one tile
+	pub pos: Pos,			// mutated when a pawn moves
+	pub rank: Vec<Rank>,	// single entry Vec used as an optional. Empty when Rank has not been revealed
+}
+```
+That's over 95 bytes per pawn if you include serialized field names, or 7.6 KB for 80 pawns. This is way too big. By bit-packing all of this into a single u32, we can reduce it to just 3 bytes per pawn.
+
+First, we encode the immutable fields into a single 9-bit pawn_id.
+```
+pub(crate) fn encode_pawn_id(setup_pos: Pos, user_index: u32) -> u32 {
+	let mut id: u32 = 0;
+	id |= user_index & 1;                   	// Bit 0: user_index (0=host, 1=guest)
+	id |= ((setup_pos.x as u32) & 0xF) << 1;	// Bits 1-4: x coordinate (4 bits, range 0-15)
+	id |= ((setup_pos.y as u32) & 0xF) << 5;	// Bits 5-8: y coordinate (4 bits, range 0-15)
+	id
+}
+```
+Then we can pack the rest with bitwise ops to trim the fat
+```
+pub(crate) fn pack_pawn(pawn: PawnState) -> u32 {
+	let mut packed: u32 = 0;						// Pack pawn_id (9 bits at head)
+	let pawn_id_packed = pawn.pawn_id & 0x1FF;		// 9 bits: 0x1FF = 511
+	packed |= pawn_id_packed << 0;					// Pack boolean flags (bits 9-11)
+	if pawn.alive { packed |= 1 << 9; }
+	if pawn.moved { packed |= 1 << 10; }
+	if pawn.moved_scout { packed |= 1 << 11; }		// Pack coordinates (4 bits each, range 0-15)
+	packed |= (pawn.pos.x as u32 & 0xF) << 12;
+	packed |= (pawn.pos.y as u32 & 0xF) << 16;
+	let rank = if pawn.rank.is_empty() { 12 } else { pawn.rank.get(0).unwrap() }; // this is safe, as rank Vec is guaranteed to have exactly one element if not empty
+	packed |= (rank as u32 & 0xF) << 20;			// Pack rank (4 bits)
+	packed
+	// Packed pawns are serialized as a u32 for the sake of memory optimization.
+}
+```
+The end result is a reduction from 95 to 3 bytes per pawn. The total size of all 80 pawns on the board drops from 3.2 KB to 0.4 KB. 
+
+We can do the same thing to Tiles too, reducing 100 of these from 7.8 KB to 0.5 KB
+```
+pub struct Tile {			// packs into a u32
+	pub passable: bool,
+	pub pos: Pos,
+	pub setup: u32,
+	pub setup_zone: u32,
+}
+```
+Even more optimization can be done to the game space to save space, but at this point, the game state is so compact that storage rent is no longer our primary fee concern.
+
+* **Efficient Stellar storage management: Priceless**
+
+This one might seem obvious, but it had a huge impact: the biggest cost reduction from Tranche 1 to Tranche 2 came from moving lobby and game state from Persistent to Temporary storage. That change alone cut the cost of starting a game by 97%.
+
+Now, Warmancer lobbies are ephemeral and have a lifespan of 24 hours. Finishing a game writes a short result log to the contract's Persistent storage and updates the win count on the winner's Persistent User profile. The Warmancer client tracks the TTLs of ledger entries and lets players extend their lobbies if needed.
+
+### Memory and Instruction optimization
+
+	We’ve heavily optimized Warmancer’s contract to reduce memory usage and instruction counts. These don’t impact fees as much as storage rent, but they still matter. Here's some miscellaneous things we've done to save on fees. Most of these are just standard Rust best practices:
+	
+	* Efficient ledger entry access
+		Entries are read once at the start of a function and written once at the end. No unnecessary reads or writes.
+	* Avoiding allocation
+		Avoid unnecessary allocation and cloning with fixed length arrays to optimize memory.
+	* Read-only simulation functions
+		We can offer clients opportunities to optimize the number of transactions they make by offering exposed read-only functions for clients to simulate for free. 
+		
+		Read only functions are also used to reduce code duplication between contract and client for particularly fragile logic that could change depending on the language, version or environment used.
+	* Fixed size on stored structs
+		Stored structs never change size when mutated. This prevents simulation mismatches where a branch of execution might require more resources than estimated. To support this, we avoid using Option<> in any stored struct.
+
+		Warmancer doesn't store move history or deltas to keep simulations predictable. We're exploring a way for players to submit a verified full replay at the end of a game to log into persistent storage.
+	* Panic over Error
+		Clients who don't simulate before submitting get no mercy. Malformed data should just a panic in production code.
+	
+### Transaction Count Optimization
+
+	One of the hardest problems in Warmancer was building a simultaneous, imperfect-information game on a fully transparent blockchain. Not only is the entire gamestate public, but so are all transactions. That means a player could easily check their opponent’s moves or pawn ranks just by looking up their address on a block explorer.
+
+	To prevent this, turns in Warmancer follow a three-stage commit reveal pattern. 
+	
+	1. commit_move: Each player submits a hash of the move they plan to make. The contract stores it, but doesn’t know what it is yet.
+
+	2. prove_move: After both players have committed, they reveal their original moves. The contract checks the hash and updates the game state, but only if no pawn information needs to be revealed.
+
+	3. prove_rank: If any unrevealed pawns are involved in combat, players must now submit proofs to reveal their ranks so the contract can resolve the turn correctly.
+	
+	This pattern ensures secrecy but requires each player to make 3 sequential transactions in the worst case scenario. It takes Stellar 5 seconds to process a ledger, so the minimum wait time is an agonizingly slow 15 seconds between turns.
+	
+	To solve this, we introduced a 'staggered' commit reveal pattern uses Stellar's transaction simulation feature to reduce cost and latency.
+	
+	Here’s how it works now:
+	
+	1. Player A checks the current turn state. If they’re the first to act, they submit commit_move.
+
+	2. Player B checks the ledger and sees that Player A already committed, so they skip straight to commit_move_and_prove_move, a batched call that does both steps in one transaction.
+
+	3. Now that the contract has commitments for both moves and proof for Player B's move, Player A simulates simulate_collisions, a read-only call that tells them whether any pawn ranks need to be revealed depending on what move was passed in.
+
+	If no ranks need to be revealed, Player A calls prove_move, and the turn is resolved.
+
+	If ranks must be revealed, Player A calls prove_move_and_prove_rank—again, batched into one transaction.
+
+	4. If any of Player B’s pawns also need to be revealed, they finish the turn with a prove_rank call.
+	
+	By peeking into the contract’s state and choosing the optimal action based on simulation results, players can skip unnecessary steps and bundle operations together. This reduces total transactions per turn from:
+
+	- Worst case: 6 → 4
+
+	- Best case: 4 → 3
+
+	- Wait time: 15s → 10s
+
+	- Fee range: $0.028 → $0.019
+
+
+	
+	
+	
+### Estimated cost breakdown on protocol 23
+
+| Function                    | Ledger Write | Instructions  | Memory Usage  | Non-refundable Fee | Rent Fee     | Total Cost |
+|----------------------------|--------------|----------------|----------------|---------------------|--------------|------------|
+| **Contract deployment**     | 32,288B      | 27,078,549     | 4,425,065B     | 760,945             | 357,346,831  | $17.33     |
+| **make_lobby**              | 1,880B       | 10,016,933     | 2,131,109B     | 158,847             | 375,494      | $0.02      |
+| **join_lobby**              | 1,632B       | 2,671,317      | 1,974,405B     | 96,134              | 361,581      | $0.02      |
+| **commit_setup**            | 1,432B       | 1,904,447      | 1,895,564B     | 79,680              | 0            | $0.004     |
+| **commit_move**             | 1,432B       | 1,934,045      | 1,907,700B     | 79,475              | 0            | $0.004     |
+| **commit_move_and_prove_move** | 1,636B   | 4,777,894      | 2,184,741B     | 90,995              | 1,417        | $0.004     |
+| **prove_move**              | 1,432B       | 9,681,279      | 2,491,505B     | 106,663             | 0            | $0.005     |
+| **prove_move_and_prove_rank** | 1,848B     | 8,944,382      | 2,529,263B     | 122,023             | 1,403        | $0.006     |
+| **prove_rank**              | 1,848B       | 3,780,417      | 2,223,335B     | 99,491              | 0            | $0.005     |
+
+
+Absolute maximum cost for two players to start and play a game of 200 turns (not possible under gameplay rules): **$4.84**
+
+Realistic maximum cost for two players to start and play a game of 200 turns: **$3.48**
+
+
+
+---
+
 ## Entry 1 - April 28 2025
 
 <div style="display: flex; justify-content: flex-start;">
