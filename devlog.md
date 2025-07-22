@@ -241,22 +241,18 @@ Now, Warmancer lobbies are ephemeral and have a lifespan of 24 hours. Finishing 
 
 ### Memory and Instruction optimization
 
-	We’ve heavily optimized Warmancer’s contract to reduce memory usage and instruction counts. These don’t impact fees as much as storage rent, but they still matter. Here's some miscellaneous things we've done to save on fees. Most of these are just standard Rust best practices:
-	
-	* Efficient ledger entry access
-		Entries are read once at the start of a function and written once at the end. No unnecessary reads or writes.
-	* Avoiding allocation
-		Avoid unnecessary allocation and cloning with fixed length arrays to optimize memory.
-	* Read-only simulation functions
-		We can offer clients opportunities to optimize the number of transactions they make by offering exposed read-only functions for clients to simulate for free. 
-		
-		Read only functions are also used to reduce code duplication between contract and client for particularly fragile logic that could change depending on the language, version or environment used.
-	* Fixed size on stored structs
-		Stored structs never change size when mutated. This prevents simulation mismatches where a branch of execution might require more resources than estimated. To support this, we avoid using Option<> in any stored struct.
+We’ve heavily optimized Warmancer’s contract to reduce memory usage and instruction counts. These don’t impact fees as much as storage rent, but they still matter. Here's some miscellaneous things we've done to save on fees. Most of these are just standard Rust best practices:
 
-		Warmancer doesn't store move history or deltas to keep simulations predictable. We're exploring a way for players to submit a verified full replay at the end of a game to log into persistent storage.
-	* Panic over Error
-		Clients who don't simulate before submitting get no mercy. Malformed data should just a panic in production code.
+* Efficient ledger entry access
+Entries are read once at the start of a function and written once at the end. No unnecessary reads or writes.
+* Avoiding allocation
+Avoid unnecessary allocation and cloning with fixed length arrays to optimize memory.
+* Read-only simulation functions
+We can offer clients opportunities to optimize the number of transactions they make by offering exposed read-only functions for clients to simulate for free. Read only functions are also used to reduce code duplication between contract and client for particularly fragile logic that could change depending on the language, version or environment used.
+* Fixed size on stored structs
+Stored structs never change size when mutated. This prevents simulation mismatches where a branch of execution might require more resources than estimated. To support this, we avoid using Option<> in any stored struct. Warmancer doesn't store move history or deltas to keep simulations predictable. We're exploring a way for players to submit a verified full replay at the end of a game to log into persistent storage.
+* Panic over Error
+	Clients who don't simulate before submitting get no mercy. Malformed data should just a panic in production code.
 	
 ### Transaction Count Optimization
 
